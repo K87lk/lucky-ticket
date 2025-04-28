@@ -12,7 +12,6 @@ public class ThreeSum {
 
     public static List<List<Integer>> threeSum(int[] nums) {
 
-        List<List<Integer>> resultList = new ArrayList<>();
         Set<List<Integer>> set = new HashSet<>();
 
         for (int i = 0; i < nums.length; i++) {
@@ -27,15 +26,11 @@ public class ThreeSum {
             }
         }
 
-        for (List<Integer> list : set) {
-            resultList.add(list);
-        }
-        return resultList;
+        return new ArrayList<>(set);
     }
 
     public static List<List<Integer>> threeSum2(int[] nums) {
 
-        List<List<Integer>> result = new ArrayList<>();
         Set<List<Integer>> set = new HashSet<>();
 
         for (int i = 0; i < nums.length; i++) {
@@ -51,10 +46,7 @@ public class ThreeSum {
             }
         }
 
-        for (List<Integer> list : set) {
-            result.add(list);
-        }
-        return result;
+        return new ArrayList<>(set);
     }
 
     public static List<List<Integer>> threeSum3(int[] nums) {

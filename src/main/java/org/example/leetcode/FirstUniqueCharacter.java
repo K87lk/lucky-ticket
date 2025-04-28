@@ -9,19 +9,17 @@ public class FirstUniqueCharacter {
 
         System.out.println(firstUniqChar(s));
     }
-    public static int firstUniqChar(String s) {
-        Map<Character, Integer> map = new HashMap<>();
-
-        for (char c : s.toCharArray()) {
-            map.put(c, map.getOrDefault(c, 0) + 1);
+    public static char firstUniqChar(String s) {
+        Map<Character, Integer> charMap = new HashMap<>();
+        var chars = s.toCharArray();
+        for (char c: chars) {
+            charMap.put(c, charMap.getOrDefault(c, 0) + 1);
         }
-
-        for (int i = 0; i < s.length(); i++) {
-            int freq = map.get(s.charAt(i));
-            if(freq == 1) {
-                return i;
+        for (char c: chars) {
+            if (charMap.get(c) == 1) {
+                return c;
             }
         }
-        return -1;
+        return 0;
     }
 }

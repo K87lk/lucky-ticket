@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Gatherer;
-import java.util.stream.Gatherers;
 
 public class NumbersWithoutDuplicateDigits {
 
@@ -31,7 +29,7 @@ public class NumbersWithoutDuplicateDigits {
         virtualExecutor.submit(() -> findUniqueDigitNumbers(min, max));
         virtualExecutor.shutdown();
         long end4 = System.currentTimeMillis();
-        
+
         System.out.println("Time: " + (end4 - start4) + " ms");
 
         executor.shutdown();
@@ -60,18 +58,18 @@ public class NumbersWithoutDuplicateDigits {
         return uniqueNumbers;
     }
 
-        private static boolean hasUniqueDigits(long number) {
-            boolean[] seen = new boolean[10];
-            while (number > 0) {
-                int digit = (int) (number % 10);
-                if (seen[digit]) {
-                    return false;
-                }
-                seen[digit] = true;
-                number /= 10;
+    private static boolean hasUniqueDigits(long number) {
+        boolean[] seen = new boolean[10];
+        while (number > 0) {
+            int digit = (int) (number % 10);
+            if (seen[digit]) {
+                return false;
             }
-            return true;
+            seen[digit] = true;
+            number /= 10;
         }
+        return true;
+    }
 
     private static boolean hasUniqueDigitsWithBitManipulation(long number) {
         int bitmask = 0; // Initialize bitmask to track digits
@@ -84,7 +82,6 @@ public class NumbersWithoutDuplicateDigits {
             bitmask |= bit; // Set the bit for this digit
             number /= 10; // Remove the last digit
         }
-
         return true; // No duplicate digits found
     }
-    }
+}

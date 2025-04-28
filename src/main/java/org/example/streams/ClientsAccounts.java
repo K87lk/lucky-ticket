@@ -4,6 +4,7 @@ import net.datafaker.Faker;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,11 +53,14 @@ public class ClientsAccounts {
                 .collect(groupingBy(Account::getCurrency, Collectors.counting()));
 
         var clientsWithUSD = clients.stream()
-                .filter(c -> c.getAccounts().stream().anyMatch(a -> a.getCurrency() == Currency.USD))
+                .filter(c -> c.getAccounts()
+                        .stream()
+                        .anyMatch(a -> a.getCurrency() == Currency.USD))
                 .toList();
 
         var clientsBalances = clients.stream()
-                .collect(toMap(Client::getFullName, c -> c.getAccounts().stream()
+                .collect(toMap(Client::getFullName, c -> c.getAccounts()
+                        .stream()
                         .map(Account::getBalance)
                         .reduce(BigDecimal.ZERO, BigDecimal::add))); // Allen Zboncak=118356796.295276163
 
@@ -70,7 +74,8 @@ public class ClientsAccounts {
         var totalBalancesByCurrency = clients.stream()
                 .flatMap(c -> c.getAccounts().stream())
                 .collect(groupingBy(Account::getCurrency,
-                        mapping(Account::getBalance, reducing(BigDecimal.ZERO, BigDecimal::add)))); // JPY=158369272.976681318, NOK=502469089.035508896
+                        mapping(Account::getBalance,
+                                reducing(BigDecimal.ZERO, BigDecimal::add)))); // JPY=158369272.976681318, NOK=502469089.035508896
 
         var accountsGroupedByType = clients.stream()
                 .flatMap(c -> c.getAccounts().stream())
@@ -83,21 +88,45 @@ public class ClientsAccounts {
 
         var highestBalanceByCurrency = clients.stream()
                 .flatMap(c -> c.getAccounts().stream())
-                .collect(groupingBy(Account::getCurrency,
-                        maxBy(Comparator.comparing(Account::getBalance))));
+                .collect(toMap(Account::getCurrency, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Account::getBalance))));
 
-        var clientsGroupedByNameAndAccountCount = clients.stream()
-                .collect(groupingBy(Client::getFullName, summarizingLong(c -> c.getAccounts().size())));
 
         var accountsGroupedByCurrency = clients.stream()
                 .flatMap(c -> c.getAccounts().stream())
                 .collect(groupingBy(Account::getCurrency, counting()));
+        // BRL=3, EUR=5, GBP=7
 
         var clientsAndNumberOfTheirAccounts = clients.stream()
                 .collect(toMap(Client::getFullName, c -> c.getAccounts().size()));
+        // Miss Tonia Gulgowski=1, Matt Auer=3, Perry Stoltenberg=3
 
         var sumOfAccounts = clients.stream().mapToInt(c -> c.getAccounts().size()).sum();
-        System.out.println(sumOfAccounts);
+
+        var idToNameMap = clients.parallelStream()
+                .collect(toConcurrentMap(Client::getClientId, Client::getFullName, (a, b) -> a + " , " + b));
+        // 0f159dea-0746-4c98-8139-7a9e2310d236=Mrs. Riva Tillman, 29eb15bb-506f-49bc-9142-8af735424c36=Dominica Kiehn
+
+        var balanceToName = clients.stream()
+                .collect(groupingBy(c -> c.getAccounts()
+                                .stream()
+                                .map(Account::getBalance)
+                                .reduce(BigDecimal::add)
+                                .orElse(BigDecimal.ZERO),
+                        mapping(Client::getFullName, toSet())));
+        // 29009814.29541677=[Ms. Pia Grady], 83505281.90742375372=[Ms. Antione Wolf]
+
+        var countByLetter = clients.stream()
+                .collect(groupingBy(c -> c.getFullName().substring(0, 1).toUpperCase(), counting()));
+        //A=1, S=2, C=1
+
+        var secondHighestBalance = clients.stream()
+                .flatMap(c -> c.getAccounts().stream())
+                .sorted(Comparator.comparing(Account::getBalance).reversed())
+                .skip(1)
+                .findFirst()
+                .orElse(null);
+
+        System.out.println(highestBalanceByCurrency);
     }
 
     private static List<Client> createClients(int numAccounts, int numClients) {
